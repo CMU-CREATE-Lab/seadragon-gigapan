@@ -2,8 +2,11 @@
 // A tool used for creating snapshots of gigapans.  The tool must be instantiated after page load.  The constructor
 // requires one argument and has an optional second argument:
 // 1) An instance of a Seadragon.Viewer in which the snapshot tool will be placed as an overlay.
-// 2) The aspect ratio (width / height) to which snapshots should be constrained.  If unspecified, the snapshot aspect
-//    ratio will not be constrained.
+// 2) A configuration object containing either or both of the following properties:
+//    * aspectRatio:  The aspect ratio (width / height) to which snapshots should be constrained.  If undefined or null,
+//                    the snapshot aspect ratio will not be constrained.
+//    * useMask:      A boolean specifying whether the greyed-out mask around the snapshot bounds should be shown when
+//                    snapshotting.  Defaults to false if undefined.
 //
 // Users must ensure that the setGigapanDimensions() method is called 1) before the tool is made visible and; 2) any
 // time a new gigapan is loaded in the viewer.
