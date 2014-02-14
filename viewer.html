@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <title>Seadragon Gigapan: Simple Viewer</title>
+   <style type="text/css">
+      #gigapan_viewer {
+         border: 1px solid black;
+         width: 500px;
+         height: 500px;
+         background-color: black;
+      }
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.10.2.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/seadragon/seadragon-min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/seadragon/GigapanTileSource.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/seadragon/SeadragonUtils.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/GigapanUtils.js"></script>
+   <script language="JavaScript" type="text/javascript">
+      var viewer = null;
+      var gigapan = {
+         "id" : 456,
+         "authKey" : null,
+         "width" : 4120,
+         "height" : 4148
+      };
+
+      $(document).ready(function() {
+         // configure Seadragon
+         Seadragon.Config.imageLoaderLimit = 6;             // max number of concurrent image downloads
+         Seadragon.Config.autoHideControls = false;         // don't show Seadragon's controls
+         Seadragon.Config.imagePath = "lib/seadragon/img/";
+
+         // create and initialize the viewer
+         viewer = new Seadragon.Viewer("gigapan_viewer");
+         viewer.setDashboardEnabled(false);
+
+         // disable click to zoom
+         viewer.tracker.clickHandler = null;
+
+         // load the gigapan
+         loadGigapan();
+      });
+
+      function loadGigapan() {
+         // clear the viewer
+         viewer.close();
+
+         window.setTimeout(function() {
+
+            // create the tile source
+            var tileSource = new org.gigapan.seadragon.GigapanTileSource(
+                  org.gigapan.GigapanUtils.createTileSourceUrlPrefixForGigapan(gigapan['id'], gigapan['authKey']),
+                  gigapan['width'],
+                  gigapan['height']
+            );
+
+            // tell the viewer to open the tile source
+            viewer.openTileSource(tileSource);
+         }, 1);
+      }
+   </script>
+
+</head>
+<body>
+<div id="gigapan_viewer"></div>
+</body>
+</html>

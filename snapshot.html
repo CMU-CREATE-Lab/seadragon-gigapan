@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <title>Seadragon Gigapan: Snapshot Tool</title>
+   <link href="css/org/gigapan/snapshot/SnapshotTool.css" rel="stylesheet" type="text/css">
+   <style type="text/css">
+      #gigapan_viewer {
+         border: 1px solid black;
+         width: 700px;
+         height: 500px;
+         background-color: black;
+      }
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.10.2.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/seadragon/seadragon-min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/seadragon/GigapanTileSource.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/seadragon/SeadragonUtils.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/snapshot/SnapshotTool.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/GigapanUtils.js"></script>
+   <script language="JavaScript" type="text/javascript">
+
+      var SNAPSHOT_TOOL_CONFIG = {
+         aspectRatio : 3 / 2,       // set this to null or undefined if you don't want to constrain the aspect ratio (default is null)
+         useMask : true             // whether the mask should be applied (default is false)
+      };
+
+      var gigapan = {
+         "id" : 3786,
+         "authKey" : null,
+         "width" : 46459,
+         "height" : 23803
+      };
+
+      var viewer = null;
+
+      $(document).ready(function() {
+
+         // configure Seadragon
+         Seadragon.Config.imageLoaderLimit = 6;             // max number of concurrent image downloads
+         Seadragon.Config.autoHideControls = false;         // don't show Seadragon's controls
+         Seadragon.Config.imagePath = "lib/seadragon/img/";
+
+         // create and initialize the viewer
+         viewer = new Seadragon.Viewer("gigapan_viewer");
+         viewer.setDashboardEnabled(false);
+
+         // disable click to zoom
+         viewer.tracker.clickHandler = null;
+
+         // create the snapshot tool
+         var snapshotTool = new org.gigapan.snapshot.SnapshotTool(viewer, SNAPSHOT_TOOL_CONFIG);
+         snapshotTool.setGigapanDimensions(gigapan.width, gigapan.height);
+         snapshotTool.setVisible(false);
+
+         $("#snapshotToolButton").click(function() {
+            if (snapshotTool.isVisible()) {
+
+               // get the snapshot tool coordinates, and show the user
+               var gigapanCoordsRect = snapshotTool.getToolBoundsInGigapanCoords();
+               var seadragonCoordsRect = snapshotTool.getToolBoundsInSeadragonCoords();
+               alert("Gigapan Coordinates:" +
+                     "\n\n" +
+                     gigapanCoordsRect.toString() +
+                     "\n\n" +
+                     "Seadragon Coordinates" +
+                     "\n\n" +
+                     seadragonCoordsRect.toString());
+
+               // hide the snapshot tool, and change the button back
+               snapshotTool.setVisible(false);
+               $("#snapshotToolButton").val("Show Snapshot Tool");
+            }
+            else {
+               // show the snapshot tool
+               snapshotTool.setVisible(true);
+               $("#snapshotToolButton").val("Take a Snapshot");
+            }
+         });
+
+         // load the gigapan
+         loadGigapan();
+      });
+
+      function loadGigapan() {
+         // clear the viewer
+         viewer.close();
+
+         window.setTimeout(function() {
+
+            // create the tile source
+            var tileSource = new org.gigapan.seadragon.GigapanTileSource(
+                  org.gigapan.GigapanUtils.createTileSourceUrlPrefixForGigapan(gigapan['id'], gigapan['authKey']),
+                  gigapan['width'],
+                  gigapan['height']
+            );
+
+            // tell the viewer to open the tile source
+            viewer.openTileSource(tileSource);
+         }, 1);
+      }
+   </script>
+
+</head>
+<body>
+<div id="gigapan_viewer"></div>
+<input id="snapshotToolButton" type="button" value="Show Snapshot Tool">
+</body>
+</html>
