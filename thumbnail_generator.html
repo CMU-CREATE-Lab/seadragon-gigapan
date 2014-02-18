@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Thumbnail Generator</title>
+   <style type="text/css">
+      .titleText {
+         font-size: 18pt;
+         text-align: center;
+      }
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.10.2.min.js"></script>
+   <script language="JavaScript" type="text/javascript">
+      $.ajaxSetup({
+                     type : 'GET',
+                     dataType : 'jsonp',
+                     timeout : 3000,
+                     cache : false,
+                     global : false
+                  });
+
+      function generateThumbnail() {
+         $("#output").empty();
+
+         var desiredSpecs = validateForm();
+
+         $.each(desiredSpecs['gigapanIdsOrAuthKeys'],
+                function(index, gigapanIdOrAuthKey) {
+                   loadGigapan(gigapanIdOrAuthKey, desiredSpecs, fetchThumbnail);
+                });
+
+      }
+
+      function loadGigapan(gigapanIdOrAuthKey, desiredSpecs, success) {
+         var publicId = gigapanIdOrAuthKey;
+         var specs = {
+            "size" : desiredSpecs['size'],
+            "willConstrainHeight" : desiredSpecs['willConstrainHeight']
+         };
+
+         // load the gigapan
+         $.ajax(
+               {
+                  url : 'http://api.gigapan.org/beta/gigapans/' + gigapanIdOrAuthKey + '.json',
+                  success : function(gigapanJSON) {
+                     if (typeof success === 'function') {
+                        specs['gigapanId'] = gigapanJSON['id'];
+                        specs['gigapanAuthKey'] = (gigapanJSON['id'] == gigapanIdOrAuthKey) ? "" : gigapanIdOrAuthKey;
+                        specs['gigapanWidth'] = gigapanJSON['width'];
+                        specs['gigapanHeight'] = gigapanJSON['height'];
+                        success(specs);
+                     }
+                  },
+                  error : function() {
+                     alert("Failed to load gigapan " + publicId);
+                  }
+               });
+      }
+
+      function fetchThumbnail(specs) {
+         console.log("fetchThumbnail()");
+         console.log(JSON.stringify(specs, null, 3));
+
+         var imageUrl1 = getUrl1(specs);
+         $("#output").append(imageUrl1 + "<br>");
+         $("#output").append('<img src="' + imageUrl1 + '"><br>');
+         //var imageUrl2 = getUrl2(specs);
+         //$("#output").append(imageUrl2 + "<br>");
+         //$("#output").append('<img src="' + imageUrl2 + '"><br>');
+      }
+
+      function getUrl1(specs) {
+         console.log("getUrl1()");
+         // Gets the image using an URL pattern like one of the following
+         // http://static.gigapan.org/gigapans0/109921/images/109921-400x223.jpg
+         // http://static.gigapan.org/gigapans0/46684/images.57adaf28f9271886eec83c91d7ce5529/46684-400x132.jpg
+
+         var urlParams = getUrlParams(specs);
+         console.log(JSON.stringify(urlParams, null, 3));
+
+         return "http://static.gigapan.org/gigapans0/" + specs['gigapanId'] + "/" + urlParams.imagesDirectory + "/" + specs['gigapanId'] + "-" + urlParams.desiredWidth + "x" + urlParams.desiredHeight + ".jpg";
+      }
+
+      function getUrl2(specs) {
+         // Gets the image using an URL pattern like one of the following
+         // http://tile109.gigapan.org/gigapans0/109921/images/109921-400x223-0-29096-0-16208.jpg
+         // http://tile46.gigapan.org/gigapans0/46684/images.57adaf28f9271886eec83c91d7ce5529/46684-400x132-0-59339-0-19645.jpg
+
+         var urlParams = getUrlParams(specs);
+
+         // compute the index of the tile server for this gigapan (note: this may change in the future, perhaps without warning!)
+         var tileServerIndex = '' + Math.floor(specs['gigapanId'] / 1000);
+         if (tileServerIndex.length < 2) {
+            tileServerIndex = '0' + tileServerIndex;
+         }
+
+         return "http://tile" + tileServerIndex + ".gigapan.org/gigapans0/" + specs['gigapanId'] + "/" + urlParams.imagesDirectory + "/" + specs['gigapanId'] + "-" + urlParams.desiredWidth + "x" + urlParams.desiredHeight + "-0-" + specs['gigapanWidth'] + "-0-" + specs['gigapanHeight'] + ".jpg";
+      }
+
+      function getUrlParams(specs) {
+         var aspectRatio = specs['gigapanWidth'] / specs['gigapanHeight'];
+         var aspectRatioInverse = 1 / aspectRatio;
+         var desiredWidth;
+         var desiredHeight;
+         if (specs['willConstrainHeight']) {
+            desiredWidth = Math.round(aspectRatio * specs['size']); //Math.round((aspectRatio < 1) ? specs['size'] : aspectRatio * specs['size']);
+            desiredHeight = Math.round(specs['size']);//Math.round((aspectRatio < 1) ? aspectRatioInverse * specs['size'] : specs['size']);
+         }
+         else {
+            console.log(aspectRatio);
+            desiredWidth = Math.round(specs['size']);
+            desiredHeight = Math.round(aspectRatioInverse * specs['size']);
+         }
+
+         var imagesDirectory = "images";
+         if (specs['gigapanAuthKey'] != '') {
+            imagesDirectory += "." + specs['gigapanAuthKey'];
+         }
+
+         return {
+            "desiredWidth" : desiredWidth,
+            "desiredHeight" : desiredHeight,
+            "imagesDirectory" : imagesDirectory
+         };
+      }
+
+      function validateForm() {
+         var gigapanIdsOrAuthKeysStr = $("#gigapanIdsOrAuthKeys").val().trim();
+         var idsOrAuthKeysRaw = gigapanIdsOrAuthKeysStr.split(/[, ]/);
+         var idsOrAuthKeys = [];
+         $.each(idsOrAuthKeysRaw,
+                function(index, item) {
+                   var trimmedItem = item.trim();
+                   if (trimmedItem.length > 0) {
+                      idsOrAuthKeys.push(trimmedItem);
+                   }
+                });
+
+         var size = parseInt($("#thumbnailSize").val(), 10);
+         var isValid = (idsOrAuthKeys.length > 0) && $.isNumeric(size) && (size > 0);
+
+         $("#generateButton").prop('disabled', !isValid);
+
+         if (isValid) {
+            return {
+               "gigapanIdsOrAuthKeys" : idsOrAuthKeys,
+               "size" : size,
+               "willConstrainHeight" : $("#willConstrainHeight").val() == "true"
+            };
+         }
+         else {
+            return {};
+         }
+      }
+   </script>
+</head>
+<body>
+<form onsubmit="return false;">
+   <table border="0" cellpadding="3" cellspacing="3">
+      <tr>
+         <td colspan="4" class="titleText">Gigapan Thumbnail Generator</td>
+      </tr>
+      <tr>
+         <td><label for="gigapanIdsOrAuthKeys">Gigapan ID(s) or Auth Key(s):</label></td>
+         <td>
+            <input id="gigapanIdsOrAuthKeys" name="gigapanIdsOrAuthKeys" type="text" onkeyup="validateForm()" size="40" value="132006, 132008, 132009, 132010, 132014, 132011, 132012, 132013, 132000, 131403, 131402, 131502, 132040, 132001, 132002, 132003, 132004, 132005">
+         </td>
+         <td></td>
+         <td></td>
+      </tr>
+      <tr>
+         <td>
+            <label for="thumbnailSize">Thumbnail Size:</label></td>
+         <td>
+            <input id="thumbnailSize" name="thumbnailSize" type="text" onkeyup="validateForm()" size="40" value="200">
+         </td>
+         <td>pixels</td>
+         <td>
+            <select id="willConstrainHeight">
+               <option value="true">tall</option>
+               <option value="false">wide</option>
+            </select>
+         </td>
+      </tr>
+      <tr>
+         <td colspan="2" align="right">
+            <button id="generateButton" onclick="generateThumbnail();">Generate</button>
+         </td>
+         <td></td>
+         <td></td>
+      </tr>
+   </table>
+</form>
+<div id="output"></div>
+</body>
+</html>
+

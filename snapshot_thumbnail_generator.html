@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Snapshot Thumbnail Generator</title>
+   <style type="text/css">
+      .titleText {
+         font-size: 18pt;
+         text-align: center;
+      }
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.10.2.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/seadragon/seadragon-min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/org/gigapan/seadragon/SeadragonUtils.js"></script>
+   <script language="JavaScript" type="text/javascript">
+      var SeadragonUtils = org.gigapan.seadragon.SeadragonUtils;
+
+      // http://static.gigapan.org/snapshots0/132003/images/345480-360x240.jpg
+
+      $.ajaxSetup({
+                     type : 'GET',
+                     dataType : 'jsonp',
+                     timeout : 3000,
+                     cache : false,
+                     global : false
+                  });
+
+      function validateForm()
+         {
+         var gigapanIdOrAuthKey = $("#gigapanIdOrAuthKey").val();
+
+         var snapshotIdsStr = $("#snapshotIds").val().trim();
+         var idsRaw = snapshotIdsStr.split(/[, ]/);
+         var ids = [];
+         $.each(idsRaw,
+                function(index, item)
+                {
+                var trimmedItem = item.trim();
+                if (trimmedItem.length > 0 && $.isNumeric(trimmedItem))
+                   {
+                   ids.push(trimmedItem);
+                   }
+                });
+
+         var height = parseInt($("#thumbnailHeight").val(), 10);
+
+         var isValid = (gigapanIdOrAuthKey != null) && (gigapanIdOrAuthKey.length > 0) && (ids.length > 0) && $.isNumeric(height) && (height > 0);
+
+         $("#generateButton").prop('disabled', !isValid);
+
+         if (isValid)
+            {
+            return {
+               "gigapanIdOrAuthKey" : gigapanIdOrAuthKey,
+               "snapshotIds" : ids,
+               "height" : height
+            };
+            }
+         else
+            {
+            return {};
+            }
+         }
+
+      function generateThumbnails()
+         {
+         $("#output").empty();
+
+         var desiredSpecs = validateForm();
+
+         loadGigapan(desiredSpecs['gigapanIdOrAuthKey'], desiredSpecs);
+
+         }
+
+      function loadGigapan(gigapanIdOrAuthKey, desiredSpecs)
+         {
+         // load the gigapan
+         $.ajax(
+               {
+                  url : 'http://api.gigapan.org/beta/gigapans/' + gigapanIdOrAuthKey + '.json',
+                  success : function(gigapan)
+                     {
+                     renderSnapshotThumbnails(gigapan, desiredSpecs);
+                     },
+                  error : function()
+                     {
+                     alert("Failed to load gigapan " + gigapanIdOrAuthKey);
+                     }
+               });
+         }
+
+      function renderSnapshotThumbnails(gigapan, specs)
+         {
+         // first create a map of the snapshots defined in the gigapan JSON
+         var allSnapshots = {};
+         $.each(gigapan['snapshot_set']['items'],
+                function(index, snapshotItem)
+                {
+                var id = snapshotItem[0];
+                var snapshot = snapshotItem[1];
+                allSnapshots[id] = {
+                   "id" : id,
+                   "name" : snapshot['name'].trim(),
+                   "description" : snapshot['description'].trim(),
+                   "taxonomicRank" : null,
+                   "boundsGigapan" : snapshot['bounds'],
+                   "boundsSeadragon" : SeadragonUtils.convertGigapanRectToSeadragonRect(snapshot['bounds']['xmin'],
+                                                                                        snapshot['bounds']['ymin'],
+                                                                                        snapshot['bounds']['xmax'],
+                                                                                        snapshot['bounds']['ymax'],
+                                                                                        gigapan['width'])
+                };
+                });
+
+         // now iterate over the desired snapshot IDs, and render the thumbnail for each along with the JSON
+         var snapshots = [];
+         var width = Math.round(specs['height']*3/2);
+         var height = specs['height'];
+         $.each(specs['snapshotIds'],
+                function(index, id)
+                {
+                var snapshot = allSnapshots[id];
+                snapshots.push(snapshot);
+
+                var imageUrl1 = "http://static.gigapan.org/snapshots0/" + gigapan['id'] + "/images/" + id + "-" + width + "x" + height + ".jpg";
+                $("#output").append(imageUrl1 + "<br>");
+                $("#output").append('<img src="' + imageUrl1 + '"><br>');
+
+                });
+         console.log(JSON.stringify(snapshots, null, 3));
+         }
+
+   </script>
+</head>
+<body>
+<form onsubmit="return false;">
+   <table border="0" cellpadding="3" cellspacing="3">
+      <tr>
+         <td colspan="2" class="titleText">Gigapan Snapshot Thumbnail Generator</td>
+      </tr>
+      <tr>
+         <td><label for="gigapanIdOrAuthKey">Gigapan ID or Auth Key:</label></td>
+         <td>
+            <input id="gigapanIdOrAuthKey" name="gigapanIdOrAuthKey" type="text" onkeyup="validateForm()" size="40" value="132001">
+         </td>
+      </tr>
+      <tr>
+         <td><label for="snapshotIds">Snapshot ID(s):</label></td>
+         <td>
+            <input id="snapshotIds" name="snapshotIds" type="text" onkeyup="validateForm()" size="40" value="350068, 350058, 349381, 349370">
+         </td>
+      </tr>
+      <tr>
+         <td>
+            <label for="thumbnailHeight">Thumbnail Height:</label></td>
+         <td>
+            <input id="thumbnailHeight" name="thumbnailHeight" type="text" onkeyup="validateForm()" size="40" value="104">
+         </td>
+      </tr>
+      <tr>
+         <td colspan="2" align="right">
+            <button id="generateButton" onclick="generateThumbnails();">Generate</button>
+         </td>
+      </tr>
+   </table>
+</form>
+<div id="output"></div>
+</body>
+</html>
+
