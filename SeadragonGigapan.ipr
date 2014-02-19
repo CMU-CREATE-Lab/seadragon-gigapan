@@ -354,6 +354,14 @@
     <mapping directory="" vcs="Git" />
   </component>
   <component name="libraryTable">
+    <library name="Jasmine 1.3.1" type="javaScript">
+      <CLASSES>
+        <root url="file://$PROJECT_DIR$/lib/jasmine-1.3.1/jasmine.js" />
+        <root url="file://$PROJECT_DIR$/lib/jasmine-1.3.1/jasmine-html.js" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
     <library name="jQuery 1.10.2" type="javaScript">
       <properties>
         <sourceFilesUrls>
