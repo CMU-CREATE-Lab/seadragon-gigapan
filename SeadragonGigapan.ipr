@@ -19,44 +19,40 @@
       </profile>
     </annotationProcessing>
   </component>
-  <component name="CopyrightManager" default="">
-    <module2copyright />
-  </component>
+  <component name="CopyrightManager" default="" />
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
   <component name="InspectionProjectProfileManager">
-    <profiles>
-      <profile version="1.0" is_locked="false">
-        <option name="myName" value="Project Default" />
-        <option name="myLocal" value="false" />
-        <inspection_tool class="CStyleArrayDeclaration" enabled="true" level="WARNING" enabled_by_default="true" />
-        <inspection_tool class="NullableProblems" enabled="true" level="ERROR" enabled_by_default="true">
-          <option name="REPORT_NULLABLE_METHOD_OVERRIDES_NOTNULL" value="true" />
-          <option name="REPORT_NOT_ANNOTATED_METHOD_OVERRIDES_NOTNULL" value="true" />
-          <option name="REPORT_NOTNULL_PARAMETER_OVERRIDES_NULLABLE" value="true" />
-          <option name="REPORT_NOT_ANNOTATED_PARAMETER_OVERRIDES_NOTNULL" value="true" />
-          <option name="REPORT_NOT_ANNOTATED_GETTER" value="true" />
-          <option name="REPORT_NOT_ANNOTATED_SETTER_PARAMETER" value="true" />
-          <option name="REPORT_ANNOTATION_NOT_PROPAGATED_TO_OVERRIDERS" value="true" />
-          <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="true" />
-        </inspection_tool>
-        <inspection_tool class="ObjectEquality" enabled="true" level="WARNING" enabled_by_default="true">
-          <option name="m_ignoreEnums" value="true" />
-          <option name="m_ignoreClassObjects" value="false" />
-          <option name="m_ignorePrivateConstructors" value="false" />
-        </inspection_tool>
-        <inspection_tool class="SpellCheckingInspection" enabled="false" level="TYPO" enabled_by_default="false">
-          <option name="processCode" value="true" />
-          <option name="processLiterals" value="true" />
-          <option name="processComments" value="true" />
-        </inspection_tool>
-        <inspection_tool class="SubtractionInCompareTo" enabled="true" level="WARNING" enabled_by_default="true" />
-        <inspection_tool class="SuspiciousIndentAfterControlStatement" enabled="true" level="WARNING" enabled_by_default="true" />
-        <inspection_tool class="VariableNotUsedInsideIf" enabled="true" level="WARNING" enabled_by_default="true" />
-      </profile>
-    </profiles>
+    <profile version="1.0">
+      <option name="myName" value="Project Default" />
+      <option name="myLocal" value="true" />
+      <inspection_tool class="CStyleArrayDeclaration" enabled="true" level="WARNING" enabled_by_default="true" />
+      <inspection_tool class="NullableProblems" enabled="true" level="ERROR" enabled_by_default="true">
+        <option name="REPORT_NULLABLE_METHOD_OVERRIDES_NOTNULL" value="true" />
+        <option name="REPORT_NOT_ANNOTATED_METHOD_OVERRIDES_NOTNULL" value="true" />
+        <option name="REPORT_NOTNULL_PARAMETER_OVERRIDES_NULLABLE" value="true" />
+        <option name="REPORT_NOT_ANNOTATED_PARAMETER_OVERRIDES_NOTNULL" value="true" />
+        <option name="REPORT_NOT_ANNOTATED_GETTER" value="true" />
+        <option name="REPORT_NOT_ANNOTATED_SETTER_PARAMETER" value="true" />
+        <option name="REPORT_ANNOTATION_NOT_PROPAGATED_TO_OVERRIDERS" value="true" />
+        <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="true" />
+      </inspection_tool>
+      <inspection_tool class="ObjectEquality" enabled="true" level="WARNING" enabled_by_default="true">
+        <option name="m_ignoreEnums" value="true" />
+        <option name="m_ignoreClassObjects" value="false" />
+        <option name="m_ignorePrivateConstructors" value="false" />
+      </inspection_tool>
+      <inspection_tool class="SpellCheckingInspection" enabled="false" level="TYPO" enabled_by_default="false">
+        <option name="processCode" value="true" />
+        <option name="processLiterals" value="true" />
+        <option name="processComments" value="true" />
+      </inspection_tool>
+      <inspection_tool class="SubtractionInCompareTo" enabled="true" level="WARNING" enabled_by_default="true" />
+      <inspection_tool class="SuspiciousIndentAfterControlStatement" enabled="true" level="WARNING" enabled_by_default="true" />
+      <inspection_tool class="VariableNotUsedInsideIf" enabled="true" level="WARNING" enabled_by_default="true" />
+    </profile>
     <option name="PROJECT_PROFILE" value="Project Default" />
     <option name="USE_PROJECT_PROFILE" value="true" />
     <version value="1.0" />
@@ -83,7 +79,6 @@
         </option>
         <option name="GENERATE_FINAL_LOCALS" value="true" />
         <option name="GENERATE_FINAL_PARAMETERS" value="true" />
-        <option name="USE_FQ_CLASS_NAMES_IN_JAVADOC" value="false" />
         <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="100" />
         <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="100" />
         <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
@@ -140,7 +135,15 @@
           <option name="FIELD_PREFIX" value="" />
           <option name="SPACE_BEFORE_PROPERTY_COLON" value="true" />
           <option name="SPACE_BEFORE_FUNCTION_LEFT_PARENTH" value="false" />
+          <option name="SPACES_WITHIN_OBJECT_LITERAL_BRACES" value="true" />
         </JSCodeStyleSettings>
+        <JSON>
+          <option name="SPACE_BEFORE_COLON" value="true" />
+          <option name="ARRAY_WRAPPING" value="5" />
+        </JSON>
+        <JavaCodeStyleSettings>
+          <option name="CLASS_NAMES_IN_JAVADOC" value="3" />
+        </JavaCodeStyleSettings>
         <XML>
           <option name="XML_ATTRIBUTE_WRAP" value="0" />
           <option name="XML_TEXT_WRAP" value="0" />
@@ -149,12 +152,6 @@
         </XML>
         <ADDITIONAL_INDENT_OPTIONS fileType="haml">
           <option name="INDENT_SIZE" value="2" />
-        </ADDITIONAL_INDENT_OPTIONS>
-        <ADDITIONAL_INDENT_OPTIONS fileType="rb">
-          <option name="INDENT_SIZE" value="2" />
-          <option name="CONTINUATION_INDENT_SIZE" value="4" />
-          <option name="TAB_SIZE" value="2" />
-          <option name="USE_RELATIVE_INDENTS" value="true" />
         </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="txt">
           <option name="INDENT_SIZE" value="2" />
@@ -166,6 +163,12 @@
             <option name="CONTINUATION_INDENT_SIZE" value="6" />
             <option name="TAB_SIZE" value="3" />
           </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="CoffeeScript">
+          <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
         <codeStyleSettings language="ECMA Script Level 4">
           <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
@@ -217,6 +220,10 @@
           <option name="FOR_BRACE_FORCE" value="3" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
+        <codeStyleSettings language="HOCON">
+          <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
         <codeStyleSettings language="HTML">
           <indentOptions>
             <option name="INDENT_SIZE" value="3" />
@@ -248,11 +255,20 @@
           <option name="ALIGN_MULTILINE_PARENTHESIZED_EXPRESSION" value="true" />
           <option name="ALIGN_MULTILINE_ARRAY_INITIALIZER_EXPRESSION" value="true" />
           <option name="SPACE_AFTER_TYPE_CAST" value="false" />
-          <option name="WRAP_COMMENTS" value="true" />
           <option name="IF_BRACE_FORCE" value="3" />
           <option name="DOWHILE_BRACE_FORCE" value="3" />
           <option name="WHILE_BRACE_FORCE" value="3" />
           <option name="FOR_BRACE_FORCE" value="3" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+          <indentOptions>
+            <option name="INDENT_SIZE" value="3" />
+            <option name="CONTINUATION_INDENT_SIZE" value="6" />
+            <option name="TAB_SIZE" value="3" />
+          </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="JSON">
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="SPACE_WITHIN_BRACES" value="true" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
           <indentOptions>
             <option name="INDENT_SIZE" value="3" />
@@ -296,6 +312,18 @@
             <option name="TAB_SIZE" value="3" />
           </indentOptions>
         </codeStyleSettings>
+        <codeStyleSettings language="Python">
+          <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
+        <codeStyleSettings language="SASS">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="3" />
+            <option name="CONTINUATION_INDENT_SIZE" value="6" />
+            <option name="TAB_SIZE" value="3" />
+          </indentOptions>
+        </codeStyleSettings>
         <codeStyleSettings language="SCSS">
           <indentOptions>
             <option name="INDENT_SIZE" value="3" />
@@ -304,6 +332,32 @@
           </indentOptions>
         </codeStyleSettings>
         <codeStyleSettings language="SQL">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="3" />
+            <option name="CONTINUATION_INDENT_SIZE" value="6" />
+            <option name="TAB_SIZE" value="3" />
+          </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="Scala">
+          <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+          <option name="BRACE_STYLE" value="3" />
+          <option name="CLASS_BRACE_STYLE" value="3" />
+          <option name="METHOD_BRACE_STYLE" value="3" />
+          <option name="ELSE_ON_NEW_LINE" value="true" />
+          <option name="WHILE_ON_NEW_LINE" value="true" />
+          <option name="CATCH_ON_NEW_LINE" value="true" />
+          <option name="FINALLY_ON_NEW_LINE" value="true" />
+          <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
+          <option name="ALIGN_MULTILINE_BINARY_OPERATION" value="true" />
+          <option name="ALIGN_MULTILINE_EXTENDS_LIST" value="true" />
+          <option name="ALIGN_MULTILINE_PARENTHESIZED_EXPRESSION" value="true" />
+          <option name="IF_BRACE_FORCE" value="3" />
+          <option name="DOWHILE_BRACE_FORCE" value="3" />
+          <option name="WHILE_BRACE_FORCE" value="3" />
+          <option name="FOR_BRACE_FORCE" value="3" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
           <indentOptions>
             <option name="INDENT_SIZE" value="3" />
             <option name="CONTINUATION_INDENT_SIZE" value="6" />
@@ -337,6 +391,10 @@
             <option name="CONTINUATION_INDENT_SIZE" value="6" />
             <option name="TAB_SIZE" value="3" />
           </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="ruby">
+          <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
       </value>
     </option>
@@ -390,4 +448,3 @@
     </library>
   </component>
 </project>
-
