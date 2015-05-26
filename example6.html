@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <title>Seadragon Gigapan: Full-Window Viewer</title>
+   <style type="text/css">
+      html, body {
+         margin: 0;
+      }
+
+      #gigapan_viewer {
+         position: absolute;
+         top: 0;
+         bottom: 0;
+         left: 0;
+         right: 0;
+         margin: 0;
+         padding: 0;
+         width: 100%;
+         background-color: black;
+      }
+
+      .message {
+         position: absolute;
+         display: none;
+         font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
+         text-align: center;
+         top: 0;
+         left: 0;
+         right: 0;
+         height: auto;
+         padding: 3px;
+         background-color: rgba(255, 255, 255, 0.8);
+      }
+
+      #instructions {
+         display: block;
+      }
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/seadragon/seadragon-min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/seadragon/GigapanTileSource.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/GigapanUtils.js"></script>
+   <script language="JavaScript" type="text/javascript">
+      var viewer = null;
+      var gigapan = {
+         "id" : 15374,
+         "authKey" : null,
+         "width" : 59783,
+         "height" : 24658
+      };
+
+      var treasureBounds = {
+         xMin : 0.38307714840318785,
+         yMin : 0.2829061029997727,
+         xMax : 0.45954897199297756,
+         yMax : 0.3254966603046417
+      };
+
+      $(document).ready(function() {
+         // configure Seadragon
+         Seadragon.Config.imageLoaderLimit = 6;             // max number of concurrent image downloads
+         Seadragon.Config.autoHideControls = false;         // don't show Seadragon's controls
+         Seadragon.Config.imagePath = "lib/seadragon/img/";
+
+         // create and initialize the viewer
+         viewer = new Seadragon.Viewer("gigapan_viewer");
+         viewer.setDashboardEnabled(false);
+         viewer.addEventListener("animationfinish", handleViewerAnimationFinish);
+
+         // disable click to zoom
+         viewer.tracker.clickHandler = null;
+
+         // load the gigapan
+         loadGigapan();
+      });
+
+      function handleViewerAnimationFinish() {
+         if (viewer.isOpen() && viewer.viewport) {
+            var rect = viewer.viewport.getBounds(true);  // definitely want "current" to be true here
+            var topLeft = rect.getTopLeft();
+            var bottomRight = rect.getBottomRight();
+
+            var isWithinTreasureBounds = topLeft.x >= treasureBounds.xMin &&
+                                         topLeft.y >= treasureBounds.yMin &&
+                                         bottomRight.x <= treasureBounds.xMax &&
+                                         bottomRight.y <= treasureBounds.yMax;
+
+            if (isWithinTreasureBounds) {
+               $("#instructions").hide();
+               $("#message").show();
+            }
+            else {
+               $("#instructions").show();
+               $("#message").hide();
+            }
+            console.log("isWithinTreasureBounds=[" + isWithinTreasureBounds + "]");
+         }
+      }
+
+      function loadGigapan() {
+         // clear the viewer
+         viewer.close();
+
+         window.setTimeout(function() {
+
+            // create the tile source
+            var tileSource = new org.gigapan.seadragon.GigapanTileSource(
+                  org.gigapan.GigapanUtils.createTileSourceUrlPrefixForGigapan(gigapan['id'], gigapan['authKey']),
+                  gigapan['width'],
+                  gigapan['height']
+            );
+
+            // tell the viewer to open the tile source
+            viewer.openTileSource(tileSource);
+         }, 1);
+      }
+   </script>
+
+</head>
+<body>
+<div id="gigapan_viewer"></div>
+<div id="instructions" class="message">Zoom in on President Obama, centering him in the window</div>
+<div id="message" class="message">You found President Obama!</div>
+</body>
+</html>
