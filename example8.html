@@ -67,34 +67,31 @@
          // create and initialize the viewer
          viewer = new Seadragon.Viewer("gigapan_viewer");
          viewer.setDashboardEnabled(false);
+         viewer.addEventListener("open", handleViewerOpen);
 
-         // disable click to zoom, and define our own custom click handler that listens for clicks on Obama
-         viewer.tracker.clickHandler = handleClick;
+         // disable click to zoom
+         viewer.tracker.clickHandler = null;
+
+         console.log("drawer:" + viewer.drawer);
 
          // load the gigapan
          loadGigapan();
       });
 
-      function handleClick(tracker, position, quick, shift) {
-         if (!isFound &&                           // if we still haven't found him
-             quick &&                              // it was just a quick click, not a mousedown-and-drag
-             viewer.isOpen() &&                    // if the viewer is open
-             viewer.viewport &&                    // if the viewport is defined
-             viewer.viewport.getZoom() >= 16) {    // if the image is sufficiently zoomed in
+      function handleViewerOpen() {
+         var obamaOverlay = $('<div class="obama_overlay"></div>');
+         viewer.drawer.addOverlay(obamaOverlay.get(0), obamaBoundsRect);
 
-            var clickLocation = viewer.viewport.pointFromPixel(position);
-
-            var obamaBoundsRectBottomRight = obamaBoundsRect.getBottomRight();
-            isFound = clickLocation.x >= obamaBoundsRect.x &&
-                      clickLocation.y >= obamaBoundsRect.y &&
-                      clickLocation.x <= obamaBoundsRectBottomRight.x &&
-                      clickLocation.y <= obamaBoundsRectBottomRight.y;
-
-            if (isFound) {
+         obamaOverlay.click(function() {
+            if (!isFound &&                           // if we still haven't found him
+                viewer.isOpen() &&                    // if the viewer is open
+                viewer.viewport &&                    // if the viewport is defined
+                viewer.viewport.getZoom() >= 16) {    // if the image is sufficiently zoomed in
+               isFound = true;
                $("#instructions").hide();
                $("#message").show();
             }
-         }
+         });
       }
 
       function loadGigapan() {
