@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <title>Seadragon Gigapan: Full-Window Viewer</title>
+   <style type="text/css">
+      html, body {
+         margin: 0;
+      }
+
+      #gigapan_viewer {
+         position: absolute;
+         top: 0;
+         bottom: 0;
+         left: 0;
+         right: 0;
+         margin: 0;
+         padding: 0;
+         width: 100%;
+         background-color: black;
+      }
+
+      .message {
+         position: absolute;
+         display: none;
+         font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
+         text-align: center;
+         top: 0;
+         left: 0;
+         right: 0;
+         height: auto;
+         padding: 3px;
+         background-color: rgba(255, 255, 255, 0.8);
+      }
+
+      #instructions {
+         display: block;
+      }
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/seadragon/seadragon-min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/seadragon/GigapanTileSource.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/GigapanUtils.js"></script>
+   <script language="JavaScript" type="text/javascript">
+      var viewer = null;
+      var gigapan = {
+         "id" : 15374,
+         "authKey" : null,
+         "width" : 59783,
+         "height" : 24658
+      };
+
+      var obamaBoundsRect = new Seadragon.Rect(
+            0.41607631915171683,    // x
+            0.2991942110229044,     // y
+            0.0037513331027429586,  // width
+            0.011886246460376565    // height
+      );
+
+      var isFound = false;
+
+      $(document).ready(function() {
+         // configure Seadragon
+         Seadragon.Config.imageLoaderLimit = 6;             // max number of concurrent image downloads
+         Seadragon.Config.autoHideControls = false;         // don't show Seadragon's controls
+         Seadragon.Config.imagePath = "lib/seadragon/img/";
+
+         // create and initialize the viewer
+         viewer = new Seadragon.Viewer("gigapan_viewer");
+         viewer.setDashboardEnabled(false);
+
+         // disable click to zoom
+         viewer.tracker.clickHandler = handleClick;
+
+         // load the gigapan
+         loadGigapan();
+      });
+
+      function handleClick(tracker, position, quick, shift) {
+         if (!isFound &&                           // if we still haven't found him
+             quick &&                              // it was just a quick click, not a mousedown-and-drag
+             viewer.isOpen() &&                    // if the viewer is open
+             viewer.viewport &&                    // if the viewport is defined
+             viewer.viewport.getZoom() >= 16) {    // if the image is sufficiently zoomed in
+
+            var clickLocation = viewer.viewport.pointFromPixel(position);
+
+            var obamaBoundsRectBottomRight = obamaBoundsRect.getBottomRight();
+            isFound = clickLocation.x >= obamaBoundsRect.x &&
+                      clickLocation.y >= obamaBoundsRect.y &&
+                      clickLocation.x <= obamaBoundsRectBottomRight.x &&
+                      clickLocation.y <= obamaBoundsRectBottomRight.y;
+
+            if (isFound) {
+               $("#instructions").hide();
+               $("#message").show();
+            }
+         }
+      }
+
+      function loadGigapan() {
+         // clear the viewer
+         viewer.close();
+
+         window.setTimeout(function() {
+
+            // create the tile source
+            var tileSource = new org.gigapan.seadragon.GigapanTileSource(
+                  org.gigapan.GigapanUtils.createTileSourceUrlPrefixForGigapan(gigapan['id'], gigapan['authKey']),
+                  gigapan['width'],
+                  gigapan['height']
+            );
+
+            // tell the viewer to open the tile source
+            viewer.openTileSource(tileSource);
+         }, 1);
+      }
+   </script>
+
+</head>
+<body>
+<div id="gigapan_viewer"></div>
+<div id="instructions" class="message">Zoom in on President Obama and click on him</div>
+<div id="message" class="message">You found President Obama!</div>
+</body>
+</html>
