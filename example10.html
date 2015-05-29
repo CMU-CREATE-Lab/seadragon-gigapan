@@ -38,6 +38,7 @@
    <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/GigapanUtils.js"></script>
    <script language="JavaScript" type="text/javascript">
       var viewer = null;
+
       var gigapan = {
          "id" : 132000,
          "authKey" : null,
@@ -51,10 +52,6 @@
                                        0.0772926,    // top left y
                                        0.065861948,  // width
                                        0.1038157),   // height
-         onclick : function(evt) {
-            evt.preventDefault();
-            viewer.viewport.fitBounds(interestPoint.zoomRect);
-         }
       };
 
       $(document).ready(function() {
@@ -101,7 +98,16 @@
          viewer.drawer.addOverlay(markerElement.get(0), interestPoint.markerPosition);
 
          // wire up the interest point's click handler
-         markerElement.click(interestPoint.onclick);
+         markerElement.click(function(evt){
+            evt.preventDefault();
+            handleInterestPointSelection(interestPoint);
+         });
+      }
+
+      function handleInterestPointSelection(interestPoint){
+         if (interestPoint) {
+            viewer.viewport.fitBounds(interestPoint.zoomRect);
+         }
       }
    </script>
 
