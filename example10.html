@@ -98,14 +98,15 @@
          viewer.drawer.addOverlay(markerElement.get(0), interestPoint.markerPosition);
 
          // wire up the interest point's click handler
-         markerElement.click(function(evt){
+         markerElement.click(function(evt) {
             evt.preventDefault();
             handleInterestPointSelection(interestPoint);
          });
       }
 
-      function handleInterestPointSelection(interestPoint){
+      function handleInterestPointSelection(interestPoint) {
          if (interestPoint) {
+            // zoom to the interest point's view bounds
             viewer.viewport.fitBounds(interestPoint.zoomRect);
          }
       }
