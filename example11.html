@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <title>Seadragon Gigapan: Full-Window Viewer, Initially Zoomed In</title>
+   <style type="text/css">
+      html, body {
+         margin: 0;
+         font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
+      }
+
+      #gigapan_viewer {
+         position: absolute;
+         top: 0;
+         bottom: 0;
+         left: 0;
+         right: 0;
+         margin: 0;
+         padding: 0;
+         width: 100%;
+         background-color: black;
+      }
+
+      .marker {
+         width: 24px;
+         height: 24px;
+         background-size: 24px 24px;
+         background: url('images/interest_point_highlighted.png') no-repeat;
+      }
+
+      .marker:hover {
+         background: url('images/interest_point_active.png') no-repeat;
+         cursor: pointer;
+      }
+
+      #media_panel {
+         position: absolute;
+         display: none;
+         top: 50px;
+         left: 50px;
+         width: 300px;
+         height: auto;
+         padding: 10px;
+         background-color: rgba(255, 255, 255, 0.9);
+         border: 1px solid black;
+      }
+
+      #media_panel_close_button {
+         position: absolute;
+         width: 32px;
+         height: 32px;
+         top: -11px;
+         right: -11px;
+         cursor: pointer;
+         background: url("images/close_button.png") no-repeat;
+      }
+
+      #media_panel_title {
+         font-size: 20px;
+         font-weight: bold;
+         margin-bottom: 5px;
+      }
+
+      #media_panel_description {
+         font-size: 16px;
+      }
+
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/seadragon/seadragon-min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/seadragon/GigapanTileSource.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/GigapanUtils.js"></script>
+   <script language="JavaScript" type="text/javascript">
+      var viewer = null;
+
+      var gigapan = {
+         "id" : 132000,
+         "authKey" : null,
+         "width" : 26163,
+         "height" : 7850
+      };
+
+      var interestPoint = {
+         markerPosition : new Seadragon.Point(0.8828625178142744, 0.1277120784381805),
+         zoomRect : new Seadragon.Rect(0.852350,     // top left x
+                                       0.0772926,    // top left y
+                                       0.065861948,  // width
+                                       0.1038157),   // height
+         mediaPanel : {
+            title : "Brush on Maxillae",
+            description : "Leptophlebiidae has a dense brush of hairs on the apico-lateral " +
+                          "(pointed front side) margin of the maxillae.  These brushing " +
+                          "mouthparts help gather and filter food particles."
+         }
+      };
+
+      $(document).ready(function() {
+         // configure Seadragon
+         Seadragon.Config.imageLoaderLimit = 6;             // max number of concurrent image downloads
+         Seadragon.Config.autoHideControls = false;         // don't show Seadragon's controls
+         Seadragon.Config.imagePath = "lib/seadragon/img/";
+
+         // create and initialize the viewer
+         viewer = new Seadragon.Viewer("gigapan_viewer");
+         viewer.setDashboardEnabled(false);
+         viewer.addEventListener("open", handleViewerOpen);
+
+         // disable click to zoom
+         viewer.tracker.clickHandler = null;
+
+         // initialize the media panel
+         $("#media_panel_close_button").click(function() {
+            $("#media_panel").hide();
+         });
+
+         // load the gigapan
+         loadGigapan();
+      });
+
+      function loadGigapan() {
+         // clear the viewer
+         viewer.close();
+
+         window.setTimeout(function() {
+
+            // create the tile source
+            var tileSource = new org.gigapan.seadragon.GigapanTileSource(
+                  org.gigapan.GigapanUtils.createTileSourceUrlPrefixForGigapan(gigapan['id'], gigapan['authKey']),
+                  gigapan['width'],
+                  gigapan['height']
+            );
+
+            // tell the viewer to open the tile source
+            viewer.openTileSource(tileSource);
+         }, 1);
+      }
+
+      function handleViewerOpen() {
+         // create the element for the interest point
+         var markerElement = $('<div class="marker"></div>');
+
+         // add the element as a point overlay
+         viewer.drawer.addOverlay(markerElement.get(0), interestPoint.markerPosition);
+
+         // wire up the interest point's click handler
+         markerElement.click(function(evt) {
+            evt.preventDefault();
+            handleInterestPointSelection(interestPoint);
+         });
+      }
+
+      function handleInterestPointSelection(interestPoint) {
+         if (interestPoint) {
+            // zoom to the interest point's view bounds
+            viewer.viewport.fitBounds(interestPoint.zoomRect);
+
+            // display the interest point media panel
+            $("#media_panel_title").text(interestPoint.mediaPanel.title);
+            $("#media_panel_description").text(interestPoint.mediaPanel.description);
+            $("#media_panel").show();
+         }
+      }
+   </script>
+
+</head>
+<body>
+<div id="gigapan_viewer"></div>
+<div id="media_panel">
+   <div id="media_panel_close_button"><i class="fa fa-times"></i></div>
+   <div id="media_panel_title"></div>
+   <div id="media_panel_description"></div>
+</div>
+</body>
+</html>
