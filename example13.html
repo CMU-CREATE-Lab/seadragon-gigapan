@@ -1,0 +1,282 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <title>Seadragon Gigapan: Multitouch With Interest Point Tap Support</title>
+   <style type="text/css">
+      html, body {
+         margin: 0;
+         font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
+      }
+
+      #gigapan_viewer {
+         position: absolute;
+         top: 0;
+         bottom: 0;
+         left: 0;
+         right: 0;
+         margin: 0;
+         padding: 0;
+         width: 100%;
+         background-color: black;
+      }
+
+      .marker {
+         width: 24px;
+         height: 24px;
+         margin: 13px;
+         cursor: pointer;
+         background-size: 24px 24px;
+         background: url('images/interest_point_highlighted.png') no-repeat;
+      }
+
+      .marker:hover {
+         background: url('images/interest_point_active.png') no-repeat;
+         cursor: pointer;
+         margin-left: auto;
+         margin-right: auto;
+      }
+
+      .marker_touch_container {
+         width: 50px;
+         height: 50px;
+      }
+
+      #media_panel {
+         position: absolute;
+         display: none;
+         top: 100px;
+         left: 50px;
+         width: 300px;
+         height: auto;
+         padding: 10px;
+         background-color: rgba(255, 255, 255, 0.9);
+         border: 1px solid black;
+      }
+
+      #media_panel_close_button {
+         position: absolute;
+         width: 32px;
+         height: 32px;
+         top: -11px;
+         right: -11px;
+         cursor: pointer;
+         background: url("images/close_button.png") no-repeat;
+      }
+
+      #media_panel_title {
+         font-size: 20px;
+         font-weight: bold;
+         margin-bottom: 5px;
+      }
+
+      #media_panel_description {
+         font-size: 16px;
+      }
+
+   </style>
+   <script language="JavaScript" type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/seadragon/seadragon-min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/seadragon/GigapanTileSource.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/GigapanUtils.js"></script>
+   <script language="JavaScript" type="text/javascript" src="src/js/org/gigapan/seadragon/SeadragonUtils.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/commons-javascript/org/cmucreatelab/events/EventManager.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/multitouch/org/cmucreatelab/util/Point.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/multitouch/org/cmucreatelab/multitouch/Touch.js"></script>
+   <script language="JavaScript" type="text/javascript" src="lib/multitouch/org/cmucreatelab/multitouch/TouchManager.js"></script>
+   <script language="JavaScript" type="text/javascript">
+      var SeadragonUtils = org.gigapan.seadragon.SeadragonUtils;
+      var touchManager = new org.cmucreatelab.multitouch.TouchManager();
+      var pinchMidpoint = null;
+
+      var viewer = null;
+      var gigapan = {
+         "id" : 132000,
+         "authKey" : null,
+         "width" : 26163,
+         "height" : 7850
+      };
+
+      var interestPoints = [
+         {
+            markerPosition : new Seadragon.Point(0.4652005995634869, 0.12954730499325404),
+            zoomRect : new Seadragon.Rect(0.20324201460617783,     // top left x
+                                          0.013004607877978247,    // top left y
+                                          0.39372532809214794,  // width
+                                          0.262483552061432),   // height
+            mediaPanel : {
+               title : "Three Tails",
+               description : "Most mayfly nymphs have three cerci (tails). These cerci are " +
+                             "highly tactile and function in sensory perception as well as " +
+                             "defense. They can be used to detect disturbances in the water " +
+                             "caused by foraging predators. Some mayfly nymphs exhibit a " +
+                             "scorpion-like posture, using their cerci in defense against " +
+                             "foraging stoneflies."
+            }
+         },
+         {
+            markerPosition : new Seadragon.Point(0.8828625178142744, 0.1277120784381805),
+            zoomRect : new Seadragon.Rect(0.852350,     // top left x
+                                          0.0772926,    // top left y
+                                          0.065861948,  // width
+                                          0.1038157),   // height
+            mediaPanel : {
+               title : "Brush on Maxillae",
+               description : "Leptophlebiidae has a dense brush of hairs on the apico-lateral " +
+                             "(pointed front side) margin of the maxillae.  These brushing " +
+                             "mouthparts help gather and filter food particles."
+            }
+         }];
+
+      $(document).ready(function() {
+         // register event handlers with the TouchManager
+         touchManager.addEventListener('tap', tapEventHandler);
+         touchManager.addEventListener('pan', panEventHandler);
+         touchManager.addEventListener('pinch-start', pinchStartEventHandler);
+         touchManager.addEventListener('pinch', pinchEventHandler);
+
+         // configure Seadragon
+         Seadragon.Config.imageLoaderLimit = 6;             // max number of concurrent image downloads
+         Seadragon.Config.autoHideControls = false;         // don't show Seadragon's controls
+         Seadragon.Config.imagePath = "lib/seadragon/img/";
+
+         // create and initialize the viewer
+         viewer = new Seadragon.Viewer("gigapan_viewer");
+         viewer.setDashboardEnabled(false);
+         viewer.addEventListener("open", handleViewerOpen);
+
+         // disable click to zoom
+         viewer.tracker.clickHandler = null;
+
+         // initialize the media panel
+         $("#media_panel_close_button").click(function() {
+            $("#media_panel").hide();
+         });
+
+         // load the gigapan
+         loadGigapan();
+      });
+
+      function loadGigapan() {
+         // clear the viewer
+         viewer.close();
+
+         window.setTimeout(function() {
+
+            // create the tile source
+            var tileSource = new org.gigapan.seadragon.GigapanTileSource(
+                  org.gigapan.GigapanUtils.createTileSourceUrlPrefixForGigapan(gigapan['id'], gigapan['authKey']),
+                  gigapan['width'],
+                  gigapan['height']
+            );
+
+            // tell the viewer to open the tile source
+            viewer.openTileSource(tileSource);
+         }, 1);
+      }
+
+      function handleViewerOpen(viewer) {
+         // create the interest points
+         interestPoints.forEach(function(interestPoint, index) {
+            // create the element for the interest point
+            var markerElement = $('<div id="marker_'+index+'" class="marker_touch_container"><div class="marker"></div></div>');
+
+            // add the element as a point overlay
+            viewer.drawer.addOverlay(markerElement.get(0), interestPoint.markerPosition);
+
+            // wire up the interest point's click handler
+            markerElement.click(function(evt) {
+               evt.preventDefault();
+               handleInterestPointSelection(interestPoint);
+            });
+
+            // this fixes a new bug/feature in Chrome where touching an element results in a stream of
+            // spurious touchMove events, even if the touch isn't actually moving.  Used to work in Chrome
+            // 33, broke some time around Chrome 38 or so.  [sigh]
+            markerElement.bind('touchmove',
+                               function(event) {
+                                  event.preventDefault();
+                                  return false;
+                               });
+         });
+
+         var touchSensitiveElement = viewer.drawer.elmt;
+
+         Seadragon.Utils.addEvent(touchSensitiveElement, "touchstart", touchManager.onTouchStart);
+         Seadragon.Utils.addEvent(touchSensitiveElement, "touchmove", touchManager.onTouchMove);
+         Seadragon.Utils.addEvent(touchSensitiveElement, "touchend", touchManager.onTouchEndOrCancel);
+         Seadragon.Utils.addEvent(touchSensitiveElement, "touchcancel", touchManager.onTouchEndOrCancel);
+      }
+
+      function handleInterestPointSelection(interestPoint) {
+         if (interestPoint) {
+            // zoom to the interest point's view bounds
+            viewer.viewport.fitBounds(interestPoint.zoomRect);
+
+            // display the interest point media panel
+            $("#media_panel_title").text(interestPoint.mediaPanel.title);
+            $("#media_panel_description").text(interestPoint.mediaPanel.description);
+            $("#media_panel").show();
+         }
+      }
+
+      function tapEventHandler(touchPoint, elapsedTouchTime, event) {
+         if (viewer.isOpen() && viewer.viewport) {
+            // See whether this was a tap on an interest point
+            if (typeof event === 'object' && event.target) {
+               var targetElement = $(event.target);
+               if (targetElement.length > 0 && targetElement.hasClass("marker_touch_container")) {
+                  var elementId = targetElement.get(0).id;
+                  if (elementId && elementId.length > 0) {
+                     var parts = elementId.split("marker_");
+                     if (parts.length == 2) {
+                        var markerId = parts[1];
+                        handleInterestPointSelection(interestPoints[markerId]);
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      function panEventHandler(pixelDeltaFromPrevious, event) {
+         if (viewer.isOpen() && viewer.viewport) {
+            var panBy = viewer.viewport.deltaPointsFromPixels(pixelDeltaFromPrevious);
+            viewer.viewport.panBy(panBy);
+         }
+      }
+
+      function pinchStartEventHandler(touch1, touch2, midpoint, event) {
+         if (viewer.isOpen() && viewer.viewport && midpoint != null) {
+            // record the current midpoint in Seadragon coords so all future pinch events during this
+            // pinch will zoom about this point
+            pinchMidpoint = SeadragonUtils.convertPageCoordsToSeadragonCoords(midpoint.toSeadragonPoint(), viewer);
+         }
+      }
+
+      function pinchEventHandler(scaleDeltaX, scaleDeltaY, scaleDeltaXY, touch1, touch2, event) {
+         // clamp the zoom scale delta to within [.8, 1.2]
+         scaleDeltaXY = Math.max(.8, Math.min(1.2, scaleDeltaXY));
+         if (viewer.isOpen() && viewer.viewport && pinchMidpoint != null) {
+            viewer.viewport.zoomBy(scaleDeltaXY, pinchMidpoint);
+
+            // clamp the zoom level to [viewer.viewport.getMinZoom(), viewer.viewport.getMaxZoom()]
+            if (viewer.viewport.getZoom() > viewer.viewport.getMaxZoom()) {
+               viewer.viewport.zoomTo(viewer.viewport.getMaxZoom(), pinchMidpoint);
+            }
+            else if (viewer.viewport.getZoom() < viewer.viewport.getMinZoom()) {
+               viewer.viewport.zoomTo(viewer.viewport.getMinZoom(), pinchMidpoint);
+            }
+         }
+      }
+   </script>
+
+</head>
+<body>
+<div id="gigapan_viewer"></div>
+<div id="media_panel">
+   <div id="media_panel_close_button"><i class="fa fa-times"></i></div>
+   <div id="media_panel_title"></div>
+   <div id="media_panel_description"></div>
+</div>
+</body>
+</html>
