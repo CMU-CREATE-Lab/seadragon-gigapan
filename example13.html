@@ -21,24 +21,22 @@
       }
 
       .marker {
-         width: 24px;
-         height: 24px;
-         margin: 13px;
          cursor: pointer;
-         background-size: 24px 24px;
-         background: url('images/interest_point_highlighted.png') no-repeat;
+         width: 50px;
+         height: 50px;
+         overflow: hidden;
+         background: transparent url('images/marker_genus.png') no-repeat scroll 0 0;
+         background-size: 50px 100px;
       }
 
       .marker:hover {
-         background: url('images/interest_point_active.png') no-repeat;
-         cursor: pointer;
-         margin-left: auto;
-         margin-right: auto;
+         background-position: 0px -50px;
       }
 
-      .marker_touch_container {
+      .marker_container {
          width: 50px;
-         height: 50px;
+         min-height: 82px;
+         height: 82px;
       }
 
       #media_panel {
@@ -178,7 +176,7 @@
          // create the interest points
          interestPoints.forEach(function(interestPoint, index) {
             // create the element for the interest point
-            var markerElement = $('<div id="marker_'+index+'" class="marker_touch_container"><div class="marker"></div></div>');
+            var markerElement = $('<div class="marker_container"><div id="marker_' + index + '" class="marker"></div></div>');
 
             // add the element as a point overlay
             viewer.drawer.addOverlay(markerElement.get(0), interestPoint.markerPosition);
@@ -224,7 +222,7 @@
             // See whether this was a tap on an interest point
             if (typeof event === 'object' && event.target) {
                var targetElement = $(event.target);
-               if (targetElement.length > 0 && targetElement.hasClass("marker_touch_container")) {
+               if (targetElement.length > 0 && targetElement.hasClass("marker")) {
                   var elementId = targetElement.get(0).id;
                   if (elementId && elementId.length > 0) {
                      var parts = elementId.split("marker_");
